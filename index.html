@@ -172,6 +172,14 @@
     }
     .coord-banner small { display: block; font-size: 0.68rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 2px; }
     .coord-banner strong { font-size: 1rem; font-weight: 800; letter-spacing: 0.02em; }
+    /* Na visão individual, tira o destaque verde do bloco do coordenador quando não é o próprio usuário */
+    .individual-view .coord-banner:not(.me) {
+      background: var(--surface-soft);
+      border-color: var(--border);
+    }
+    .individual-view .coord-banner:not(.me) small {
+      color: var(--muted);
+    }
 
     .roles-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
     .role-tile {
@@ -531,6 +539,7 @@
         }
       });
 
+      container.classList.toggle("individual-view", filterName !== "TODOS");
       container.innerHTML = filtered.map((row, idx) => {
         const isNext = idx === nextIndex;
         const rowKey = keyOf(row);
@@ -558,7 +567,7 @@
         if (coordCol) {
           const cp = row._raw[coordCol];
           rolesHTML += `
-            <div class="coord-banner">
+            <div class="coord-banner ${cp === filterName ? "me" : ""}">
               <small>Coordenador</small>
               <strong>${cp}${mark(cp)}</strong>
             </div>
