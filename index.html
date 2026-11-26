@@ -3,114 +3,161 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#121212">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#0d0f12" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#eef1f5" media="(prefers-color-scheme: light)">
   <title>Escala Equipe Técnica</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
+    /* ===== TEMA ESCURO (padrão) ===== */
     :root {
-      --bg: #121212;
-      --card: #1e2024;
-      --border: #2c2f36;
+      --bg: #0d0f12;
+      --card: #171a1f;
+      --border: #2a2e36;
       --text: #f1f3f5;
       --muted: #9aa0a6;
-      --accent: #00d084;
-      --next-gold: #fbbf24;
-      --pill-bg: #2a2d35;
+      --soft: rgba(255, 255, 255, 0.05);
+      --soft-strong: rgba(255, 255, 255, 0.12);
+      --pill-bg: #20242b;
+
+      --accent: #00e394;
+      --accent-rgb: 0, 227, 148;
+      --gold: #ffc933;
+      --gold-rgb: 255, 201, 51;
+      --cyan: #3ad8ff;
+      --cyan-rgb: 58, 216, 255;
+
+      --glow-accent: 0 0 6px rgba(var(--accent-rgb), .7), 0 0 18px rgba(var(--accent-rgb), .35);
+      --glow-gold: 0 0 6px rgba(var(--gold-rgb), .7), 0 0 20px rgba(var(--gold-rgb), .35);
+      --glow-cyan: 0 0 6px rgba(var(--cyan-rgb), .6), 0 0 16px rgba(var(--cyan-rgb), .3);
+      --text-glow-accent: 0 0 8px rgba(var(--accent-rgb), .75);
+      --next-bg: linear-gradient(145deg, #231f12 0%, #171a1f 70%);
+      --on-accent: #06130d;
     }
+
+    /* ===== TEMA CLARO ===== */
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #eef1f5;
+        --card: #ffffff;
+        --border: #d5dae2;
+        --text: #14171a;
+        --muted: #5b626b;
+        --soft: rgba(20, 23, 26, 0.04);
+        --soft-strong: rgba(20, 23, 26, 0.09);
+        --pill-bg: #eef1f5;
+
+        --accent: #00a56e;
+        --accent-rgb: 0, 165, 110;
+        --gold: #c98a00;
+        --gold-rgb: 214, 150, 0;
+        --cyan: #0089b3;
+        --cyan-rgb: 0, 137, 179;
+
+        /* No claro o brilho é mais discreto para não borrar */
+        --glow-accent: 0 0 5px rgba(var(--accent-rgb), .45), 0 0 14px rgba(var(--accent-rgb), .22);
+        --glow-gold: 0 0 5px rgba(var(--gold-rgb), .45), 0 0 14px rgba(var(--gold-rgb), .22);
+        --glow-cyan: 0 0 5px rgba(var(--cyan-rgb), .4), 0 0 12px rgba(var(--cyan-rgb), .2);
+        --text-glow-accent: 0 0 6px rgba(var(--accent-rgb), .35);
+        --next-bg: linear-gradient(145deg, #fff6dc 0%, #ffffff 70%);
+        --on-accent: #ffffff;
+      }
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
     body { background: var(--bg); color: var(--text); padding: 16px; max-width: 600px; margin: 0 auto; padding-bottom: 40px; }
     header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
     h1 { font-size: 1.2rem; font-weight: 700; letter-spacing: -0.02em; }
-    .badge-live { font-size: 0.7rem; background: rgba(0, 208, 132, 0.15); color: var(--accent); padding: 4px 8px; border-radius: 99px; font-weight: 600; }
+    .badge-live {
+      font-size: 0.7rem; background: rgba(var(--accent-rgb), 0.12); color: var(--accent);
+      border: 1px solid rgba(var(--accent-rgb), 0.55); padding: 4px 9px; border-radius: 99px; font-weight: 600;
+      box-shadow: var(--glow-accent); text-shadow: var(--text-glow-accent);
+    }
     .filter-box { background: var(--card); padding: 12px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 18px; }
     .filter-box label { display: block; font-size: 0.75rem; color: var(--muted); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; }
     select { width: 100%; padding: 10px 12px; border-radius: 8px; background: var(--bg); color: var(--text); border: 1px solid var(--border); font-size: 0.95rem; outline: none; }
-    select:focus { border-color: var(--accent); }
+    select:focus { border-color: var(--accent); box-shadow: var(--glow-accent); }
 
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; margin-bottom: 14px; position: relative; }
-    .card.highlight { border-left: 4px solid var(--accent); }
-    
+    .card.highlight { border-left: 4px solid var(--accent); box-shadow: var(--glow-accent); }
+
     /* Destaque da Próxima Escala */
     .card.next-up {
-      border: 1.5px solid var(--next-gold);
-      background: linear-gradient(145deg, #25231b 0%, #1e2024 100%);
-      box-shadow: 0 0 18px rgba(251, 191, 36, 0.18);
+      border: 1.5px solid var(--gold);
+      background: var(--next-bg);
+      box-shadow: var(--glow-gold);
     }
     .next-badge {
-      display: inline-block;
-      background: var(--next-gold);
-      color: #121212;
-      font-size: 0.65rem;
-      font-weight: 800;
-      padding: 3px 8px;
-      border-radius: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      margin-bottom: 6px;
+      display: inline-block; background: var(--gold); color: #121212;
+      font-size: 0.65rem; font-weight: 800; padding: 3px 8px; border-radius: 6px;
+      text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px;
+      box-shadow: var(--glow-gold);
     }
 
     .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; gap: 8px; }
-    .date { font-size: 1.08rem; font-weight: 700; color: #fff; }
+    .date { font-size: 1.08rem; font-weight: 700; color: var(--text); }
+    .weekday { font-size: 0.8rem; font-weight: 500; color: var(--muted); margin-left: 4px; }
     .time { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
-    .event-tag { font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 99px; background: rgba(255,255,255,0.08); color: #e9ecef; white-space: nowrap; }
+    .event-tag {
+      font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 99px; white-space: nowrap;
+      background: rgba(var(--cyan-rgb), 0.1); color: var(--cyan);
+      border: 1px solid rgba(var(--cyan-rgb), 0.55); box-shadow: var(--glow-cyan);
+    }
 
-    /* Bloco de Informações Centralizado */
     .info-banner {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px dashed var(--border);
-      border-radius: 8px;
-      padding: 8px 12px;
-      margin-bottom: 10px;
-      text-align: center;
-      font-size: 0.82rem;
-      color: #e2e8f0;
-      line-height: 1.4;
+      background: var(--soft); border: 1px dashed var(--border); border-radius: 8px;
+      padding: 8px 12px; margin-bottom: 10px; text-align: center; font-size: 0.82rem; color: var(--text); line-height: 1.4;
     }
 
     .roles-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--border); }
-    
-    /* Coordenador ocupando 2 colunas e centralizado */
+
     .coord-box {
       grid-column: span 2;
-      background: rgba(0, 208, 132, 0.1);
-      border: 1px solid rgba(0, 208, 132, 0.25);
-      padding: 8px 12px;
-      border-radius: 8px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
+      background: rgba(var(--accent-rgb), 0.1);
+      border: 1px solid rgba(var(--accent-rgb), 0.55);
+      box-shadow: var(--glow-accent);
+      padding: 8px 12px; border-radius: 8px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
     }
     .coord-box .role-name { color: var(--accent); font-size: 0.68rem; margin-bottom: 2px; }
     .coord-box .person-name { font-size: 0.95rem; font-weight: 700; letter-spacing: 0.02em; }
 
-    .role-item { background: var(--pill-bg); padding: 7px 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; }
+    .role-item { background: var(--pill-bg); padding: 7px 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; border: 1px solid transparent; }
     .role-name { color: var(--muted); font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
-    .person-name { font-weight: 600; color: #fff; }
-    .person-me { color: var(--accent); font-weight: 800; }
+    .person-name { font-weight: 600; color: var(--text); }
+    .person-me { color: var(--accent); font-weight: 800; text-shadow: var(--text-glow-accent); }
 
-    /* Botão Adicionar à Agenda */
     .cal-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      width: 100%;
-      margin-top: 12px;
-      padding: 8px 12px;
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid var(--border);
-      color: var(--text);
-      font-size: 0.78rem;
-      font-weight: 600;
-      text-decoration: none;
-      transition: background 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%;
+      margin-top: 12px; padding: 8px 12px; border-radius: 8px;
+      background: var(--soft); border: 1px solid var(--border); color: var(--text);
+      font-size: 0.78rem; font-weight: 600; text-decoration: none; transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
     }
-    .cal-btn:hover, .cal-btn:active { background: rgba(255, 255, 255, 0.12); }
+    .cal-btn:hover, .cal-btn:active { background: var(--soft-strong); border-color: var(--accent); box-shadow: var(--glow-accent); }
 
     .loading, .empty { text-align: center; color: var(--muted); padding: 40px 20px; font-size: 0.9rem; line-height: 1.5; }
+
+    /* ===== CALENDÁRIOS DO INTEGRANTE ===== */
+    .cal-section-title { font-size: 0.75rem; font-weight: 600; color: var(--muted); text-transform: uppercase; margin: 26px 0 10px; }
+    .month-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 14px; }
+    .month-name { font-size: 0.95rem; font-weight: 700; text-transform: capitalize; margin-bottom: 10px; }
+    .month-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+    .dow { text-align: center; font-size: 0.65rem; font-weight: 600; color: var(--muted); padding-bottom: 2px; }
+    .day {
+      aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; font-weight: 500; color: var(--muted); border-radius: 8px; border: 1px solid transparent;
+    }
+    .day.today { border-color: var(--muted); color: var(--text); }
+    .day.on {
+      background: rgba(var(--accent-rgb), 0.16); color: var(--accent); font-weight: 800;
+      border-color: var(--accent); box-shadow: var(--glow-accent); text-shadow: var(--text-glow-accent);
+      cursor: pointer;
+    }
+    .day.on.next { background: rgba(var(--gold-rgb), 0.18); color: var(--gold); border-color: var(--gold); box-shadow: var(--glow-gold); text-shadow: none; }
+    .legend { display: flex; gap: 14px; font-size: 0.7rem; color: var(--muted); margin-top: 10px; }
+    .legend i { display: inline-block; width: 9px; height: 9px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+    .legend .l-on { background: var(--accent); box-shadow: var(--glow-accent); }
+    .legend .l-next { background: var(--gold); box-shadow: var(--glow-gold); }
   </style>
 </head>
 <body>
@@ -130,10 +177,13 @@
   </div>
 
   <div id="scheduleList" class="loading">Carregando escalas...</div>
+  <div id="memberCalendars"></div>
 
   <script>
     const BASE_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSXiQUm_GcKyup0R2ksKynxi-j7H9MHTCRqodZnsG8ImN0pdZva9c0VWvUHgUKRF1YWN3tswiZW_bmX/pub?gid=0&single=true&output=csv";
     const TARGET_ROLES = ["COORDENADOR", "PC", "YAMAHA", "CORTEX", "BERINGHER"];
+    const WEEKDAYS = ["domingo", "segunda-feira", "terça-feira", "quarta-feira", "quinta-feira", "sexta-feira", "sábado"];
+    const WEEKDAYS_SHORT = ["D", "S", "T", "Q", "Q", "S", "S"];
     let allRows = [];
     let activeRoleHeaders = [];
 
@@ -162,7 +212,6 @@
       if (lines.length < 2) return [];
       const rawHeaders = parseCSVLine(lines[0]).map(h => h.trim());
 
-      // Identifica exatamente as colunas das 5 funções mantendo a ordem definida
       activeRoleHeaders = [];
       TARGET_ROLES.forEach(target => {
         const found = rawHeaders.find(h => h.toUpperCase() === target);
@@ -181,12 +230,30 @@
       });
     }
 
-    function parseBRDate(dateStr) {
+    // Retorna { y, m, d } (m de 1 a 12) ou null
+    function parseBRParts(dateStr) {
       if (!dateStr) return null;
       const parts = dateStr.split("/");
       if (parts.length !== 3) return null;
-      return new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]), 23, 59, 59);
+      let y = Number(parts[2]);
+      if (y < 100) y += 2000;
+      const m = Number(parts[1]);
+      const d = Number(parts[0]);
+      if (!y || !m || !d) return null;
+      return { y, m, d };
     }
+
+    function parseBRDate(dateStr) {
+      const p = parseBRParts(dateStr);
+      return p ? new Date(p.y, p.m - 1, p.d, 23, 59, 59) : null;
+    }
+
+    function weekdayName(dateStr) {
+      const p = parseBRParts(dateStr);
+      return p ? WEEKDAYS[new Date(p.y, p.m - 1, p.d).getDay()] : "";
+    }
+
+    function dayKey(p) { return `${p.y}-${p.m}-${p.d}`; }
 
     function formatYYYYMMDD(dateObj) {
       const yyyy = dateObj.getFullYear();
@@ -250,6 +317,55 @@
       });
     }
 
+    // Calendários mensais do integrante selecionado
+    function renderMemberCalendars(memberRows, filterName, nextRow) {
+      const box = document.getElementById("memberCalendars");
+      if (filterName === "TODOS" || !memberRows.length) {
+        box.innerHTML = "";
+        return;
+      }
+
+      const scheduled = {};   // chave do dia -> id do card
+      const months = new Map(); // "y-m" -> { y, m }
+      memberRows.forEach(row => {
+        const p = parseBRParts(row["DATA"]);
+        if (!p) return;
+        scheduled[dayKey(p)] = p.y * 10000 + p.m * 100 + p.d;
+        months.set(`${p.y}-${p.m}`, { y: p.y, m: p.m });
+      });
+
+      const nextParts = nextRow ? parseBRParts(nextRow["DATA"]) : null;
+      const nextKey = nextParts ? dayKey(nextParts) : null;
+      const t = new Date();
+      const todayKey = dayKey({ y: t.getFullYear(), m: t.getMonth() + 1, d: t.getDate() });
+
+      const sorted = Array.from(months.values()).sort((a, b) => (a.y - b.y) || (a.m - b.m));
+
+      const html = sorted.map(({ y, m }) => {
+        const firstDow = new Date(y, m - 1, 1).getDay();
+        const daysInMonth = new Date(y, m, 0).getDate();
+        const monthLabel = new Date(y, m - 1, 1).toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+
+        let cells = WEEKDAYS_SHORT.map(l => `<div class="dow">${l}</div>`).join("");
+        for (let i = 0; i < firstDow; i++) cells += `<div></div>`;
+        for (let d = 1; d <= daysInMonth; d++) {
+          const key = dayKey({ y, m, d });
+          const on = scheduled[key];
+          const cls = ["day", on ? "on" : "", key === nextKey ? "next" : "", key === todayKey ? "today" : ""].filter(Boolean).join(" ");
+          cells += on
+            ? `<div class="${cls}" data-card="d-${on}" title="Dia de escala">${d}</div>`
+            : `<div class="${cls}">${d}</div>`;
+        }
+        return `<div class="month-card"><div class="month-name">${monthLabel}</div><div class="month-grid">${cells}</div></div>`;
+      }).join("");
+
+      box.innerHTML = `
+        <div class="cal-section-title">Calendário de ${filterName}</div>
+        ${html}
+        <div class="legend"><span><i class="l-on"></i>Dia de escala</span><span><i class="l-next"></i>Próxima escala</span></div>
+      `;
+    }
+
     function render(filterName) {
       const container = document.getElementById("scheduleList");
       const filtered = filterName === "TODOS"
@@ -257,7 +373,9 @@
         : allRows.filter(r => activeRoleHeaders.some(role => r._raw[role] === filterName));
 
       if (!filtered.length) {
+        container.className = "";
         container.innerHTML = `<div class="empty">Nenhuma escala encontrada.<br><small>Verifique se o link publicado aponta para a aba <b>Escalas</b>.</small></div>`;
+        renderMemberCalendars([], filterName, null);
         return;
       }
 
@@ -310,12 +428,16 @@
         const infoText = row["INFORMAÇÕES"] || row["INFORMACOES"] || row["INFORMAÇÃO"] || row["INFORMACAO"] || row["OBS"] || "";
         const calLink = buildGoogleCalendarLink(row, rowRoles);
 
+        const p = parseBRParts(row["DATA"]);
+        const cardId = p ? `d-${p.y * 10000 + p.m * 100 + p.d}` : "";
+        const wd = weekdayName(row["DATA"]);
+
         return `
-          <div class="card ${isNext ? 'next-up' : (isUserScheduled ? 'highlight' : '')}">
+          <div class="card ${isNext ? 'next-up' : (isUserScheduled ? 'highlight' : '')}" ${cardId ? `id="${cardId}"` : ""}>
             ${isNext ? '<div class="next-badge">★ Próxima Escala</div>' : ''}
             <div class="card-top">
               <div>
-                <div class="date">${row["DATA"] || ""}</div>
+                <div class="date">${row["DATA"] || ""}${wd ? `<span class="weekday">${wd}</span>` : ""}</div>
                 <div class="time">${horaIni} ${horaFim ? 'às ' + horaFim : ''}</div>
               </div>
               <span class="event-tag">${row["EVENTO"] || "Culto"}</span>
@@ -328,7 +450,17 @@
           </div>
         `;
       }).join("");
+
+      renderMemberCalendars(filtered, filterName, nextIndex >= 0 ? filtered[nextIndex] : null);
     }
+
+    // Toque num dia de escala do calendário rola até o card correspondente
+    document.getElementById("memberCalendars").addEventListener("click", (e) => {
+      const cell = e.target.closest(".day.on");
+      if (!cell) return;
+      const card = document.getElementById(cell.dataset.card);
+      if (card) card.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
 
     fetch(`${BASE_CSV_URL}&t=${Date.now()}`)
       .then(res => res.text())
