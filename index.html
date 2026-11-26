@@ -6,7 +6,7 @@
   <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#0d0f12" media="(prefers-color-scheme: dark)">
   <meta name="theme-color" content="#eef1f5" media="(prefers-color-scheme: light)">
-  <title>Escala Equipe Técnica</title>
+  <title>Escalas DESIL</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     /* ===== TEMA ESCURO (padrão) ===== */
@@ -79,7 +79,7 @@
     select:focus { border-color: var(--accent); box-shadow: var(--glow-accent); }
 
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; margin-bottom: 14px; position: relative; }
-    .card.highlight { border-left: 4px solid var(--accent); box-shadow: var(--glow-accent); }
+    .card.highlight { border-left: 4px solid var(--accent); }
 
     /* Destaque da Próxima Escala */
     .card.next-up {
@@ -158,13 +158,43 @@
     .legend i { display: inline-block; width: 9px; height: 9px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
     .legend .l-on { background: var(--accent); box-shadow: var(--glow-accent); }
     .legend .l-next { background: var(--gold); box-shadow: var(--glow-gold); }
+
+    /* ===== CONFIRMAÇÃO DE PRESENÇA ===== */
+    .chk { color: var(--accent); font-weight: 800; margin-left: 6px; text-shadow: var(--text-glow-accent); }
+    .confirm-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+      margin-top: 12px; padding: 10px 12px; border-radius: 8px; cursor: pointer;
+      background: rgba(var(--gold-rgb), 0.14); border: 1px solid var(--gold); color: var(--gold);
+      font-size: 0.82rem; font-weight: 700; box-shadow: var(--glow-gold);
+    }
+    .confirm-count { background: var(--gold); color: #121212; border-radius: 99px; padding: 1px 8px; font-size: 0.72rem; font-weight: 800; }
+
+    .modal { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 50; }
+    .modal[hidden] { display: none; }
+    .modal-card {
+      position: relative; width: 100%; max-width: 420px; max-height: 85vh; overflow-y: auto;
+      background: var(--card); border: 1px solid var(--gold); border-radius: 16px; padding: 18px; box-shadow: var(--glow-gold);
+    }
+    .modal-card h2 { font-size: 1rem; font-weight: 700; margin-bottom: 12px; padding-right: 28px; }
+    .modal-close { position: absolute; top: 10px; right: 12px; background: none; border: none; color: var(--muted); font-size: 1.6rem; line-height: 1; cursor: pointer; }
+    .confirm-list { list-style: none; margin-bottom: 14px; }
+    .confirm-list li { display: flex; justify-content: space-between; gap: 8px; padding: 8px 10px; border-radius: 8px; background: var(--pill-bg); margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; }
+    .confirm-list .st { font-weight: 500; color: var(--muted); }
+    .confirm-list li.ok .st { color: var(--accent); text-shadow: var(--text-glow-accent); }
+    .modal-card label { display: block; font-size: 0.75rem; color: var(--muted); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; }
+    .confirm-submit {
+      width: 100%; margin-top: 10px; padding: 11px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 800;
+      background: var(--accent); color: var(--on-accent); border: none; box-shadow: var(--glow-accent);
+    }
+    .confirm-submit:disabled { opacity: 0.6; }
+    .confirm-msg { margin-top: 10px; font-size: 0.82rem; color: var(--muted); text-align: center; }
   </style>
 </head>
 <body>
 
   <header>
     <div>
-      <h1>Escala Técnica</h1>
+      <h1>Escalas DESIL</h1>
     </div>
     <span class="badge-live">● Sincronizado</span>
   </header>
@@ -179,6 +209,14 @@
   <div id="scheduleList" class="loading">Carregando escalas...</div>
   <div id="memberCalendars"></div>
 
+  <div id="confirmModal" class="modal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+      <button class="modal-close" type="button" data-close-modal aria-label="Fechar">×</button>
+      <h2 id="confirmTitle">Confirmações</h2>
+      <div id="confirmBody"></div>
+    </div>
+  </div>
+
   <script>
     const BASE_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSXiQUm_GcKyup0R2ksKynxi-j7H9MHTCRqodZnsG8ImN0pdZva9c0VWvUHgUKRF1YWN3tswiZW_bmX/pub?gid=0&single=true&output=csv";
     const TARGET_ROLES = ["COORDENADOR", "PC", "YAMAHA", "CORTEX", "BERINGHER"];
@@ -186,6 +224,11 @@
     const WEEKDAYS_SHORT = ["D", "S", "T", "Q", "Q", "S", "S"];
     let allRows = [];
     let activeRoleHeaders = [];
+
+    // Cole aqui a URL do Apps Script (termina em /exec). Vazio = confirmações desligadas.
+    const CONFIRM_URL = "https://script.google.com/macros/s/AKfycbz0SzAhkWcwH2K-0cfhl-e67W5jRCvHE6upLNK_GkR3WOlwVCKp3lG_3BRtVp8lKmtl/exec";
+    let confirmations = [];
+    let nextInfo = null;
 
     function parseCSVLine(line) {
       const result = [];
@@ -366,6 +409,88 @@
       `;
     }
 
+    function keyOf(row) { return `${row["DATA"] || ""}|${row["EVENTO"] || ""}`; }
+    function isConfirmed(key, name) { return confirmations.some(c => c.chave === key && c.nome === name); }
+    function currentFilter() { return document.getElementById("memberFilter").value; }
+
+    function loadConfirmations() {
+      return fetch(`${CONFIRM_URL}?t=${Date.now()}`)
+        .then(r => r.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            confirmations = data;
+            render(currentFilter());
+            refreshModal();
+          }
+        })
+        .catch(() => {});
+    }
+
+    function openConfirmModal() {
+      if (!nextInfo) return;
+      document.getElementById("confirmModal").hidden = false;
+      document.body.style.overflow = "hidden";
+      refreshModal();
+    }
+
+    function closeConfirmModal() {
+      document.getElementById("confirmModal").hidden = true;
+      document.body.style.overflow = "";
+    }
+
+    function refreshModal() {
+      const modal = document.getElementById("confirmModal");
+      if (modal.hidden || !nextInfo) return;
+      const { key, people, date } = nextInfo;
+      const wd = weekdayName(date);
+      document.getElementById("confirmTitle").textContent = `Escala de ${date}${wd ? " " + wd : ""}`;
+
+      const items = people.map(p => {
+        const c = confirmations.find(c => c.chave === key && c.nome === p);
+        const when = c && c.em ? new Date(c.em).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : "";
+        return `<li class="${c ? "ok" : ""}"><span>${p}</span><span class="st">${c ? "✓ " + when : "Pendente"}</span></li>`;
+      }).join("");
+
+      const pending = people.filter(p => !isConfirmed(key, p));
+      const sel = currentFilter();
+      const form = pending.length
+        ? `<label for="confirmName">Quem está confirmando?</label>
+           <select id="confirmName">${pending.map(p => `<option value="${p}" ${p === sel ? "selected" : ""}>${p}</option>`).join("")}</select>
+           <button type="button" class="confirm-submit" id="confirmSubmit">Confirmar que vi a escala</button>
+           <div class="confirm-msg" id="confirmMsg"></div>`
+        : `<div class="confirm-msg">Todos já confirmaram. 🎉</div>`;
+
+      document.getElementById("confirmBody").innerHTML = `<ul class="confirm-list">${items}</ul>${form}`;
+    }
+
+    function submitConfirm() {
+      const name = document.getElementById("confirmName").value;
+      const btn = document.getElementById("confirmSubmit");
+      const msg = document.getElementById("confirmMsg");
+      btn.disabled = true;
+      btn.textContent = "Enviando...";
+      fetch(`${CONFIRM_URL}?action=confirm&chave=${encodeURIComponent(nextInfo.key)}&nome=${encodeURIComponent(name)}`)
+        .then(r => r.json())
+        .then(data => {
+          if (!Array.isArray(data)) throw new Error("resposta inválida");
+          confirmations = data;
+          render(currentFilter());
+          refreshModal();
+        })
+        .catch(() => {
+          btn.disabled = false;
+          btn.textContent = "Confirmar que vi a escala";
+          msg.textContent = "Não foi possível confirmar. Tente de novo.";
+        });
+    }
+
+    document.addEventListener("click", (e) => {
+      if (e.target.closest("[data-open-confirm]")) openConfirmModal();
+      else if (e.target.closest("[data-close-modal]") || e.target.id === "confirmModal") closeConfirmModal();
+      else if (e.target.id === "confirmSubmit") submitConfirm();
+    });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeConfirmModal(); });
+
     function render(filterName) {
       const container = document.getElementById("scheduleList");
       const filtered = filterName === "TODOS"
@@ -379,6 +504,7 @@
         return;
       }
 
+      nextInfo = null;
       const now = new Date();
       let nextIndex = -1;
       let minDiff = Infinity;
@@ -396,6 +522,14 @@
       container.className = "";
       container.innerHTML = filtered.map((row, idx) => {
         const isNext = idx === nextIndex;
+        const rowKey = keyOf(row);
+        const people = [...new Set(activeRoleHeaders.map(r => row._raw[r]).filter(Boolean))];
+        if (isNext) nextInfo = { key: rowKey, people, date: row["DATA"] || "" };
+        const mark = (person) => (isNext && CONFIRM_URL && isConfirmed(rowKey, person)) ? '<span class="chk" title="Confirmou">✓</span>' : "";
+        const nConf = people.filter(p => isConfirmed(rowKey, p)).length;
+        const confirmBtn = (isNext && CONFIRM_URL)
+          ? `<button type="button" class="confirm-btn" data-open-confirm>✔ Confirmar presença <span class="confirm-count">${nConf}/${people.length}</span></button>`
+          : "";
         const rowRoles = activeRoleHeaders.filter(role => row._raw[role]);
         const isUserScheduled = filterName !== "TODOS" && rowRoles.some(r => row._raw[r] === filterName);
 
@@ -409,7 +543,7 @@
           rolesHTML += `
             <div class="coord-box">
               <span class="role-name">${coordCol}</span>
-              <span class="${isMe ? 'person-me' : 'person-name'}">${coordPerson}</span>
+              <span class="${isMe ? 'person-me' : 'person-name'}">${coordPerson}${mark(coordPerson)}</span>
             </div>
           `;
         }
@@ -419,7 +553,7 @@
           const isMe = person === filterName;
           return `<div class="role-item">
             <span class="role-name">${role}</span>
-            <span class="${isMe ? 'person-me' : 'person-name'}">${person}</span>
+            <span class="${isMe ? 'person-me' : 'person-name'}">${person}${mark(person)}</span>
           </div>`;
         }).join("");
 
@@ -444,6 +578,7 @@
             </div>
             ${infoText ? `<div class="info-banner">${infoText}</div>` : ''}
             <div class="roles-grid">${rolesHTML}</div>
+            ${confirmBtn}
             <a href="${calLink}" target="_blank" rel="noopener" class="cal-btn">
               📅 Adicionar ao Google Agenda
             </a>
@@ -469,6 +604,7 @@
         allRows = parsed.filter(r => r["DATA"]);
         populateFilter(allRows);
         render(document.getElementById("memberFilter").value);
+        if (CONFIRM_URL) loadConfirmations();
       })
       .catch(() => {
         document.getElementById("scheduleList").innerHTML =
