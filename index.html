@@ -187,26 +187,36 @@
       return new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]), 23, 59, 59);
     }
 
+    function formatYYYYMMDD(dateObj) {
+      const yyyy = dateObj.getFullYear();
+      const mm = String(dateObj.getMonth() + 1).padStart(2, "0");
+      const dd = String(dateObj.getDate()).padStart(2, "0");
+      return `${yyyy}${mm}${dd}`;
+    }
+
     function buildGoogleCalendarLink(row, activeRoles) {
-      const title = encodeURIComponent(`${row["EVENTO"] || "Escala Técnica"} - Equipe Técnica`);
+      const title = encodeURIComponent("Escala DESIL");
       const parts = (row["DATA"] || "").split("/");
       let datesParam = "";
 
       if (parts.length === 3) {
-        const yyyy = parts[2];
-        const mm = parts[1].padStart(2, "0");
-        const dd = parts[0].padStart(2, "0");
+        const startDate = new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
+        const endDate = new Date(startDate);
+        endDate.setDate(endDate.getDate() + 1); // Padrão do Google Agenda para Dia Inteiro (data início / dia seguinte)
 
-        const iniStr = (row["HORA_INICIO"] || row["HORA INICIO"] || "19:00").replace(":", "").padEnd(6, "0").slice(0, 6);
-        const fimStr = (row["HORA_FIM"] || row["HORA FIM"] || "21:00").replace(":", "").padEnd(6, "0").slice(0, 6);
-
-        datesParam = `&dates=${yyyy}${mm}${dd}T${iniStr}/${yyyy}${mm}${dd}T${fimStr}`;
+        datesParam = `&dates=${formatYYYYMMDD(startDate)}/${formatYYYYMMDD(endDate)}`;
       }
 
+      const eventoNome = row["EVENTO"] || "";
       const info = row["INFORMAÇÕES"] || row["INFORMACOES"] || row["INFORMAÇÃO"] || row["INFORMACAO"] || row["OBS"] || "";
       const teamText = activeRoles.map(r => `${r}: ${row._raw[r]}`).join("\n");
-      const detailsText = (info ? `Observações: ${info}\n\n` : "") + `Escalação:\n${teamText}`;
-      const details = encodeURIComponent(detailsText);
+
+      let detailsParts = [];
+      if (eventoNome) detailsParts.push(`Evento: ${eventoNome}`);
+      if (info) detailsParts.push(`Observações: ${info}`);
+      detailsParts.push(`Escalação:\n${teamText}`);
+
+      const details = encodeURIComponent(detailsParts.join("\n\n"));
 
       return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}${datesParam}&details=${details}`;
     }
@@ -216,7 +226,6 @@
       rows.forEach(r => roleColumns.forEach(role => { if (r._raw[role]) names.add(r._raw[role]); }));
       const select = document.getElementById("memberFilter");
 
-      // Ordenação alfabética respeitando acentos do português (ex: ÁRTUR no início)
       const sortedNames = Array.from(names).sort((a, b) => a.localeCompare(b, 'pt-BR', { sensitivity: 'base' }));
 
       sortedNames.forEach(name => {
@@ -248,89 +257,10 @@
         return;
       }
 
-      // Identifica a escala mais próxima a partir de hoje
       const now = new Date();
       let nextIndex = -1;
       let minDiff = Infinity;
       filtered.forEach((row, idx) => {
         const d = parseBRDate(row["DATA"]);
         if (d && d >= now) {
-          const diff = d - now;
-          if (diff < minDiff) {
-            minDiff = diff;
-            nextIndex = idx;
-          }
-        }
-      });
-
-      container.className = "";
-      container.innerHTML = filtered.map((row, idx) => {
-        const isNext = idx === nextIndex;
-        const activeRoles = roleColumns.filter(role => row._raw[role]);
-        const isUserScheduled = filterName !== "TODOS" && activeRoles.some(r => row._raw[r] === filterName);
-
-        // Separa Coordenador das demais funções
-        const coordCol = activeRoles.find(r => r.toUpperCase() === "COORDENADOR");
-        const otherRoles = activeRoles.filter(r => r.toUpperCase() !== "COORDENADOR");
-
-        let rolesHTML = "";
-        if (coordCol) {
-          const coordPerson = row._raw[coordCol];
-          const isMe = coordPerson === filterName;
-          rolesHTML += `
-            <div class="coord-box">
-              <span class="role-name">${coordCol}</span>
-              <span class="${isMe ? 'person-me' : 'person-name'}">${coordPerson}</span>
-            </div>
-          `;
-        }
-
-        rolesHTML += otherRoles.map(role => {
-          const person = row._raw[role];
-          const isMe = person === filterName;
-          return `<div class="role-item">
-            <span class="role-name">${role}</span>
-            <span class="${isMe ? 'person-me' : 'person-name'}">${person}</span>
-          </div>`;
-        }).join("");
-
-        const horaIni = row["HORA_INICIO"] || row["HORA INICIO"] || "";
-        const horaFim = row["HORA_FIM"] || row["HORA FIM"] || "";
-        const infoText = row["INFORMAÇÕES"] || row["INFORMACOES"] || row["INFORMAÇÃO"] || row["INFORMACAO"] || row["OBS"] || "";
-        const calLink = buildGoogleCalendarLink(row, activeRoles);
-
-        return `
-          <div class="card ${isNext ? 'next-up' : (isUserScheduled ? 'highlight' : '')}">
-            ${isNext ? '<div class="next-badge">★ Próxima Escala</div>' : ''}
-            <div class="card-top">
-              <div>
-                <div class="date">${row["DATA"] || ""}</div>
-                <div class="time">${horaIni} ${horaFim ? 'às ' + horaFim : ''}</div>
-              </div>
-              <span class="event-tag">${row["EVENTO"] || "Culto"}</span>
-            </div>
-            ${infoText ? `<div class="info-banner">${infoText}</div>` : ''}
-            <div class="roles-grid">${rolesHTML}</div>
-            <a href="${calLink}" target="_blank" rel="noopener" class="cal-btn">
-              📅 Adicionar ao Google Agenda
-            </a>
-          </div>
-        `;
-      }).join("");
-    }
-
-    fetch(CSV_URL)
-      .then(res => res.text())
-      .then(csv => {
-        const parsed = parseCSV(csv);
-        allRows = parsed.filter(r => r["DATA"]);
-        populateFilter(allRows);
-        render(document.getElementById("memberFilter").value);
-      })
-      .catch(() => {
-        document.getElementById("scheduleList").innerHTML =
-          `<div class="empty">Erro ao carregar planilha. Verifique o link CSV.</div>`;
-      });
-  </script>
-</body>
-</html>
+          const diff = d - now
