@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#121212">
+  <title>Escala Equipe Técnica</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #121212;
+      --card: #1e2024;
+      --border: #2c2f36;
+      --text: #f1f3f5;
+      --muted: #9aa0a6;
+      --accent: #00d084;
+      --pill-bg: #2a2d35;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 16px; max-width: 600px; margin: 0 auto; padding-bottom: 40px; }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+    h1 { font-size: 1.2rem; font-weight: 700; letter-spacing: -0.02em; }
+    .badge-live { font-size: 0.7rem; background: rgba(0, 208, 132, 0.15); color: var(--accent); padding: 4px 8px; border-radius: 99px; font-weight: 600; }
+    .filter-box { background: var(--card); padding: 12px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 18px; }
+    .filter-box label { display: block; font-size: 0.75rem; color: var(--muted); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; }
+    select { width: 100%; padding: 10px 12px; border-radius: 8px; background: var(--bg); color: var(--text); border: 1px solid var(--border); font-size: 0.95rem; outline: none; }
+    select:focus { border-color: var(--accent); }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; margin-bottom: 12px; transition: transform 0.1s; }
+    .card.highlight { border-left: 4px solid var(--accent); }
+    .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .date { font-size: 1.05rem; font-weight: 700; color: #fff; }
+    .time { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+    .event-tag { font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 99px; background: rgba(255,255,255,0.08); color: #e9ecef; }
+    .roles-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+    .role-item { background: var(--pill-bg); padding: 6px 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; }
+    .role-name { color: var(--muted); font-size: 0.72rem; font-weight: 600; text-transform: uppercase; }
+    .person-name { font-weight: 600; color: #fff; }
+    .person-me { color: var(--accent); font-weight: 700; }
+    .loading, .empty { text-align: center; color: var(--muted); padding: 40px 20px; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <h1>Escala Técnica</h1>
+    </div>
+    <span class="badge-live">● Sincronizado</span>
+  </header>
+
+  <div class="filter-box">
+    <label for="memberFilter">Filtrar por integrante</label>
+    <select id="memberFilter">
+      <option value="TODOS">Todos os integrantes (Escala Geral)</option>
+    </select>
+  </div>
+
+  <div id="scheduleList" class="loading">Carregando escalas...</div>
+
+  <script>
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSXiQUm_GcKyup0R2ksKynxi-j7H9MHTCRqodZnsG8ImN0pdZva9c0VWvUHgUKRF1YWN3tswiZW_bmX/pub?gid=0&single=true&output=csv";
+    const ROLES = ["Coordenador", "PC", "Yamaha", "Cortex", "Beringher"];
+    let allRows = [];
+
+    function parseCSV(text) {
+      const lines = text.trim().split(/\r?\n/);
+      const headers = lines[0].split(",").map(h => h.trim().replace(/^"|"$/g, ""));
+      return lines.slice(1).map(line => {
+        const values = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || line.split(",");
+        const obj = {};
+        headers.forEach((h, i) => {
+          obj[h] = (values[i] || "").trim().replace(/^"|"$/g, "");
+        });
+        return obj;
+      });
+    }
+
+    function populateFilter(rows) {
+      const names = new Set();
+      rows.forEach(r => ROLES.forEach(role => { if (r[role]) names.add(r[role]); }));
+      const select = document.getElementById("memberFilter");
+      Array.from(names).sort().forEach(name => {
+        const opt = document.createElement("option");
+        opt.value = name;
+        opt.textContent = name;
+        select.appendChild(opt);
+      });
+
+      const saved = localStorage.getItem("selectedMember");
+      if (saved && Array.from(names).includes(saved)) {
+        select.value = saved;
+      }
+
+      select.addEventListener("change", (e) => {
+        localStorage.setItem("selectedMember", e.target.value);
+        render(e.target.value);
+      });
+    }
+
+    function render(filterName) {
+      const container = document.getElementById("scheduleList");
+      const filtered = filterName === "TODOS"
+        ? allRows
+        : allRows.filter(r => ROLES.some(role => r[role] === filterName));
+
+      if (!filtered.length) {
+        container.innerHTML = `<div class="empty">Nenhuma escala encontrada para ${filterName}.</div>`;
+        return;
+      }
+
+      container.className = "";
+      container.innerHTML = filtered.map(row => {
+        const activeRoles = ROLES.filter(role => row[role]);
+        const isUserScheduled = filterName !== "TODOS" && activeRoles.some(r => row[r] === filterName);
+        const rolesHTML = activeRoles.map(role => {
+          const person = row[role];
+          const isMe = person === filterName;
+          return `<div class="role-item">
+            <span class="role-name">${role}</span>
+            <span class="${isMe ? 'person-me' : 'person-name'}">${person}</span>
+          </div>`;
+        }).join("");
+
+        return `
+          <div class="card ${isUserScheduled ? 'highlight' : ''}">
+            <div class="card-top">
+              <div>
+                <div class="date">${row.Data || ""}</div>
+                <div class="time">${row.Hora_Inicio || ""} ${row.Hora_Fim ? 'às ' + row.Hora_Fim : ''}</div>
+              </div>
+              <span class="event-tag">${row.Evento || "Culto"}</span>
+            </div>
+            <div class="roles-grid">${rolesHTML}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    fetch(CSV_URL)
+      .then(res => res.text())
+      .then(csv => {
+        allRows = parseCSV(csv).filter(r => r.Data);
+        populateFilter(allRows);
+        render(document.getElementById("memberFilter").value);
+      })
+      .catch(() => {
+        document.getElementById("scheduleList").innerHTML =
+          `<div class="empty">Erro ao carregar planilha. Verifique se o link CSV foi publicado corretamente.</div>`;
+      });
+  </script>
+</body>
+</html>
