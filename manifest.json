@@ -1,0 +1,17 @@
+{
+  "name": "Escala DESIL - Equipe Técnica",
+  "short_name": "Escala DESIL",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0d0f12",
+  "theme_color": "#00e699",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-512.png.jfif",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
