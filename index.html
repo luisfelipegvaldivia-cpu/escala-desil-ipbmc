@@ -3,77 +3,203 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#121212">
-  <title>Escala Equipe Técnica</title>
+  <title>Escala Equipe Técnica - DESIL</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #121212;
-      --card: #1e2024;
-      --border: #2c2f36;
-      --text: #f1f3f5;
-      --muted: #9aa0a6;
-      --accent: #00d084;
-      --next-gold: #fbbf24;
-      --pill-bg: #2a2d35;
+      /* Tema Escuro (Padrão Mesa de Som / Neon) */
+      --bg: #0b0d10;
+      --card: #13171d;
+      --border: #232a35;
+      --text: #f1f5f9;
+      --muted: #8b98a9;
+      --pill-bg: #1a2029;
+      --neon-primary: #00f5a0;
+      --neon-primary-rgb: 0, 245, 160;
+      --neon-cyan: #00d9f5;
+      --neon-cyan-rgb: 0, 217, 245;
+      --neon-gold: #ffbe0b;
+      --neon-gold-rgb: 255, 190, 11;
+      --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-    body { background: var(--bg); color: var(--text); padding: 16px; max-width: 600px; margin: 0 auto; padding-bottom: 40px; }
-    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
-    h1 { font-size: 1.2rem; font-weight: 700; letter-spacing: -0.02em; }
-    .badge-live { font-size: 0.7rem; background: rgba(0, 208, 132, 0.15); color: var(--accent); padding: 4px 8px; border-radius: 99px; font-weight: 600; }
-    .filter-box { background: var(--card); padding: 12px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 18px; }
-    .filter-box label { display: block; font-size: 0.75rem; color: var(--muted); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; }
-    select { width: 100%; padding: 10px 12px; border-radius: 8px; background: var(--bg); color: var(--text); border: 1px solid var(--border); font-size: 0.95rem; outline: none; }
-    select:focus { border-color: var(--accent); }
 
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; margin-bottom: 14px; position: relative; }
-    .card.highlight { border-left: 4px solid var(--accent); }
-    
-    /* Destaque da Próxima Escala */
+    @media (prefers-color-scheme: light) {
+      :root {
+        /* Tema Claro (Adaptado com Glow Suave) */
+        --bg: #f1f5f9;
+        --card: #ffffff;
+        --border: #cbd5e1;
+        --text: #0f172a;
+        --muted: #64748b;
+        --pill-bg: #f8fafc;
+        --neon-primary: #059669;
+        --neon-primary-rgb: 5, 150, 105;
+        --neon-cyan: #0284c7;
+        --neon-cyan-rgb: 2, 132, 199;
+        --neon-gold: #d97706;
+        --neon-gold-rgb: 217, 119, 6;
+        --card-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+      }
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      padding: 16px;
+      max-width: 600px;
+      margin: 0 auto;
+      padding-bottom: 48px;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    h1 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      text-shadow: 0 0 14px rgba(var(--neon-cyan-rgb), 0.35);
+    }
+    .badge-live {
+      font-size: 0.7rem;
+      background: rgba(var(--neon-primary-rgb), 0.14);
+      color: var(--neon-primary);
+      border: 1px solid rgba(var(--neon-primary-rgb), 0.45);
+      box-shadow: 0 0 10px rgba(var(--neon-primary-rgb), 0.3);
+      padding: 4px 10px;
+      border-radius: 99px;
+      font-weight: 700;
+    }
+
+    .filter-box {
+      background: var(--card);
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: var(--card-shadow);
+      margin-bottom: 18px;
+    }
+    .filter-box label {
+      display: block;
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      font-size: 0.95rem;
+      font-weight: 600;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    select:focus {
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 12px rgba(var(--neon-cyan-rgb), 0.35);
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+      position: relative;
+      box-shadow: var(--card-shadow);
+    }
+    .card.highlight {
+      border-color: rgba(var(--neon-primary-rgb), 0.55);
+      box-shadow: 0 0 14px rgba(var(--neon-primary-rgb), 0.18);
+    }
+
+    /* Destaque Neon da Próxima Escala */
     .card.next-up {
-      border: 1.5px solid var(--next-gold);
-      background: linear-gradient(145deg, #25231b 0%, #1e2024 100%);
-      box-shadow: 0 0 18px rgba(251, 191, 36, 0.18);
+      border: 1.5px solid var(--neon-gold);
+      box-shadow: 0 0 20px rgba(var(--neon-gold-rgb), 0.28), inset 0 0 12px rgba(var(--neon-gold-rgb), 0.06);
     }
     .next-badge {
       display: inline-block;
-      background: var(--next-gold);
-      color: #121212;
+      background: var(--neon-gold);
+      color: #0b0d10;
       font-size: 0.65rem;
       font-weight: 800;
-      padding: 3px 8px;
+      padding: 3px 9px;
       border-radius: 6px;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
-      margin-bottom: 6px;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+      box-shadow: 0 0 12px rgba(var(--neon-gold-rgb), 0.55);
     }
 
-    .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; gap: 8px; }
-    .date { font-size: 1.08rem; font-weight: 700; color: #fff; }
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+      gap: 8px;
+    }
+    .date-row {
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .date { font-size: 1.08rem; font-weight: 800; color: var(--text); }
+    .weekday { font-size: 0.82rem; font-weight: 500; color: var(--muted); }
     .time { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
-    .event-tag { font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 99px; background: rgba(255,255,255,0.08); color: #e9ecef; white-space: nowrap; }
+    .event-tag {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 99px;
+      background: rgba(var(--neon-cyan-rgb), 0.12);
+      color: var(--neon-cyan);
+      border: 1px solid rgba(var(--neon-cyan-rgb), 0.35);
+      box-shadow: 0 0 8px rgba(var(--neon-cyan-rgb), 0.2);
+      white-space: nowrap;
+    }
 
-    /* Bloco de Informações Centralizado */
     .info-banner {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px dashed var(--border);
+      background: rgba(var(--neon-cyan-rgb), 0.05);
+      border: 1px dashed rgba(var(--neon-cyan-rgb), 0.35);
       border-radius: 8px;
       padding: 8px 12px;
       margin-bottom: 10px;
       text-align: center;
       font-size: 0.82rem;
-      color: #e2e8f0;
+      color: var(--text);
       line-height: 1.4;
     }
 
-    .roles-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--border); }
-    
-    /* Coordenador ocupando 2 colunas e centralizado */
+    .roles-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Coordenador com Brilho Neon */
     .coord-box {
       grid-column: span 2;
-      background: rgba(0, 208, 132, 0.1);
-      border: 1px solid rgba(0, 208, 132, 0.25);
+      background: rgba(var(--neon-primary-rgb), 0.09);
+      border: 1px solid rgba(var(--neon-primary-rgb), 0.45);
+      box-shadow: 0 0 12px rgba(var(--neon-primary-rgb), 0.18);
       padding: 8px 12px;
       border-radius: 8px;
       display: flex;
@@ -82,15 +208,31 @@
       justify-content: center;
       text-align: center;
     }
-    .coord-box .role-name { color: var(--accent); font-size: 0.68rem; margin-bottom: 2px; }
-    .coord-box .person-name { font-size: 0.95rem; font-weight: 700; letter-spacing: 0.02em; }
+    .coord-box .role-name { color: var(--neon-primary); font-size: 0.68rem; margin-bottom: 2px; font-weight: 700; }
+    .coord-box .person-name { font-size: 0.96rem; font-weight: 800; letter-spacing: 0.02em; }
 
-    .role-item { background: var(--pill-bg); padding: 7px 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; }
+    .role-item {
+      background: var(--pill-bg);
+      border: 1px solid var(--border);
+      padding: 7px 10px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.82rem;
+    }
+    .role-item.active-me {
+      border-color: rgba(var(--neon-primary-rgb), 0.6);
+      box-shadow: 0 0 10px rgba(var(--neon-primary-rgb), 0.22);
+    }
     .role-name { color: var(--muted); font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
-    .person-name { font-weight: 600; color: #fff; }
-    .person-me { color: var(--accent); font-weight: 800; }
+    .person-name { font-weight: 600; color: var(--text); }
+    .person-me {
+      color: var(--neon-primary);
+      font-weight: 800;
+      text-shadow: 0 0 8px rgba(var(--neon-primary-rgb), 0.45);
+    }
 
-    /* Botão Adicionar à Agenda */
     .cal-btn {
       display: flex;
       align-items: center;
@@ -98,250 +240,53 @@
       gap: 6px;
       width: 100%;
       margin-top: 12px;
-      padding: 8px 12px;
+      padding: 9px 12px;
       border-radius: 8px;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid var(--border);
-      color: var(--text);
+      background: rgba(var(--neon-cyan-rgb), 0.08);
+      border: 1px solid rgba(var(--neon-cyan-rgb), 0.35);
+      color: var(--neon-cyan);
       font-size: 0.78rem;
-      font-weight: 600;
+      font-weight: 700;
       text-decoration: none;
-      transition: background 0.15s;
+      transition: box-shadow 0.2s, background 0.2s;
     }
-    .cal-btn:hover, .cal-btn:active { background: rgba(255, 255, 255, 0.12); }
-
-    .loading, .empty { text-align: center; color: var(--muted); padding: 40px 20px; font-size: 0.9rem; line-height: 1.5; }
-  </style>
-</head>
-<body>
-
-  <header>
-    <div>
-      <h1>Escala Técnica</h1>
-    </div>
-    <span class="badge-live">● Sincronizado</span>
-  </header>
-
-  <div class="filter-box">
-    <label for="memberFilter">Filtrar por integrante</label>
-    <select id="memberFilter">
-      <option value="TODOS">Todos os integrantes (Escala Geral)</option>
-    </select>
-  </div>
-
-  <div id="scheduleList" class="loading">Carregando escalas...</div>
-
-  <script>
-    const BASE_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSXiQUm_GcKyup0R2ksKynxi-j7H9MHTCRqodZnsG8ImN0pdZva9c0VWvUHgUKRF1YWN3tswiZW_bmX/pub?gid=0&single=true&output=csv";
-    const TARGET_ROLES = ["COORDENADOR", "PC", "YAMAHA", "CORTEX", "BERINGHER"];
-    let allRows = [];
-    let activeRoleHeaders = [];
-
-    function parseCSVLine(line) {
-      const result = [];
-      let current = "";
-      let inQuotes = false;
-      for (let i = 0; i < line.length; i++) {
-        const char = line[i];
-        if (char === '"') {
-          inQuotes = !inQuotes;
-        } else if (char === ',' && !inQuotes) {
-          result.push(current.trim());
-          current = "";
-        } else {
-          current += char;
-        }
-      }
-      result.push(current.trim());
-      return result;
+    .cal-btn:hover, .cal-btn:active {
+      background: rgba(var(--neon-cyan-rgb), 0.16);
+      box-shadow: 0 0 12px rgba(var(--neon-cyan-rgb), 0.35);
     }
 
-    function parseCSV(text) {
-      const cleanText = text.replace(/^\uFEFF/, "").trim();
-      const lines = cleanText.split(/\r?\n/);
-      if (lines.length < 2) return [];
-      const rawHeaders = parseCSVLine(lines[0]).map(h => h.trim());
-
-      // Identifica exatamente as colunas das 5 funções mantendo a ordem definida
-      activeRoleHeaders = [];
-      TARGET_ROLES.forEach(target => {
-        const found = rawHeaders.find(h => h.toUpperCase() === target);
-        if (found) activeRoleHeaders.push(found);
-      });
-
-      return lines.slice(1).map(line => {
-        const values = parseCSVLine(line);
-        const obj = { _raw: {} };
-        rawHeaders.forEach((h, i) => {
-          const val = (values[i] || "").trim();
-          obj[h.toUpperCase()] = val;
-          obj._raw[h] = val;
-        });
-        return obj;
-      });
+    /* Seção de Calendários Mensais no Rodapé */
+    .calendar-section {
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
     }
-
-    function parseBRDate(dateStr) {
-      if (!dateStr) return null;
-      const parts = dateStr.split("/");
-      if (parts.length !== 3) return null;
-      return new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]), 23, 59, 59);
+    .calendar-section-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--neon-primary);
+      text-shadow: 0 0 10px rgba(var(--neon-primary-rgb), 0.3);
+      margin-bottom: 14px;
+      text-align: center;
     }
-
-    function formatYYYYMMDD(dateObj) {
-      const yyyy = dateObj.getFullYear();
-      const mm = String(dateObj.getMonth() + 1).padStart(2, "0");
-      const dd = String(dateObj.getDate()).padStart(2, "0");
-      return `${yyyy}${mm}${dd}`;
+    .month-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 14px;
+      box-shadow: var(--card-shadow);
     }
-
-    function buildGoogleCalendarLink(row, rowRoles) {
-      const title = encodeURIComponent("Escala DESIL");
-      const parts = (row["DATA"] || "").split("/");
-      let datesParam = "";
-
-      if (parts.length === 3) {
-        const startDate = new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
-        const endDate = new Date(startDate);
-        endDate.setDate(endDate.getDate() + 1);
-        datesParam = `&dates=${formatYYYYMMDD(startDate)}/${formatYYYYMMDD(endDate)}`;
-      }
-
-      const eventoNome = row["EVENTO"] || "";
-      const info = row["INFORMAÇÕES"] || row["INFORMACOES"] || row["INFORMAÇÃO"] || row["INFORMACAO"] || row["OBS"] || "";
-      const teamText = rowRoles.map(r => `${r}: ${row._raw[r]}`).join("\n");
-
-      let detailsParts = [];
-      if (eventoNome) detailsParts.push(`Evento: ${eventoNome}`);
-      if (info) detailsParts.push(`Observações: ${info}`);
-      detailsParts.push(`Escalação:\n${teamText}`);
-
-      const details = encodeURIComponent(detailsParts.join("\n\n"));
-
-      return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}${datesParam}&details=${details}`;
+    .month-header {
+      text-align: center;
+      font-size: 0.95rem;
+      font-weight: 700;
+      text-transform: capitalize;
+      margin-bottom: 10px;
+      color: var(--text);
     }
-
-    function populateFilter(rows) {
-      const names = new Set();
-      rows.forEach(r => {
-        activeRoleHeaders.forEach(role => {
-          if (r._raw[role]) names.add(r._raw[role]);
-        });
-      });
-
-      const select = document.getElementById("memberFilter");
-      const sortedNames = Array.from(names).sort((a, b) => a.localeCompare(b, 'pt-BR', { sensitivity: 'base' }));
-
-      sortedNames.forEach(name => {
-        const opt = document.createElement("option");
-        opt.value = name;
-        opt.textContent = name;
-        select.appendChild(opt);
-      });
-
-      const saved = localStorage.getItem("selectedMember");
-      if (saved && sortedNames.includes(saved)) {
-        select.value = saved;
-      }
-
-      select.addEventListener("change", (e) => {
-        localStorage.setItem("selectedMember", e.target.value);
-        render(e.target.value);
-      });
-    }
-
-    function render(filterName) {
-      const container = document.getElementById("scheduleList");
-      const filtered = filterName === "TODOS"
-        ? allRows
-        : allRows.filter(r => activeRoleHeaders.some(role => r._raw[role] === filterName));
-
-      if (!filtered.length) {
-        container.innerHTML = `<div class="empty">Nenhuma escala encontrada.<br><small>Verifique se o link publicado aponta para a aba <b>Escalas</b>.</small></div>`;
-        return;
-      }
-
-      const now = new Date();
-      let nextIndex = -1;
-      let minDiff = Infinity;
-      filtered.forEach((row, idx) => {
-        const d = parseBRDate(row["DATA"]);
-        if (d && d >= now) {
-          const diff = d - now;
-          if (diff < minDiff) {
-            minDiff = diff;
-            nextIndex = idx;
-          }
-        }
-      });
-
-      container.className = "";
-      container.innerHTML = filtered.map((row, idx) => {
-        const isNext = idx === nextIndex;
-        const rowRoles = activeRoleHeaders.filter(role => row._raw[role]);
-        const isUserScheduled = filterName !== "TODOS" && rowRoles.some(r => row._raw[r] === filterName);
-
-        const coordCol = rowRoles.find(r => r.toUpperCase() === "COORDENADOR");
-        const otherRoles = rowRoles.filter(r => r.toUpperCase() !== "COORDENADOR");
-
-        let rolesHTML = "";
-        if (coordCol) {
-          const coordPerson = row._raw[coordCol];
-          const isMe = coordPerson === filterName;
-          rolesHTML += `
-            <div class="coord-box">
-              <span class="role-name">${coordCol}</span>
-              <span class="${isMe ? 'person-me' : 'person-name'}">${coordPerson}</span>
-            </div>
-          `;
-        }
-
-        rolesHTML += otherRoles.map(role => {
-          const person = row._raw[role];
-          const isMe = person === filterName;
-          return `<div class="role-item">
-            <span class="role-name">${role}</span>
-            <span class="${isMe ? 'person-me' : 'person-name'}">${person}</span>
-          </div>`;
-        }).join("");
-
-        const horaIni = row["HORA_INICIO"] || row["HORA INICIO"] || "";
-        const horaFim = row["HORA_FIM"] || row["HORA FIM"] || "";
-        const infoText = row["INFORMAÇÕES"] || row["INFORMACOES"] || row["INFORMAÇÃO"] || row["INFORMACAO"] || row["OBS"] || "";
-        const calLink = buildGoogleCalendarLink(row, rowRoles);
-
-        return `
-          <div class="card ${isNext ? 'next-up' : (isUserScheduled ? 'highlight' : '')}">
-            ${isNext ? '<div class="next-badge">★ Próxima Escala</div>' : ''}
-            <div class="card-top">
-              <div>
-                <div class="date">${row["DATA"] || ""}</div>
-                <div class="time">${horaIni} ${horaFim ? 'às ' + horaFim : ''}</div>
-              </div>
-              <span class="event-tag">${row["EVENTO"] || "Culto"}</span>
-            </div>
-            ${infoText ? `<div class="info-banner">${infoText}</div>` : ''}
-            <div class="roles-grid">${rolesHTML}</div>
-            <a href="${calLink}" target="_blank" rel="noopener" class="cal-btn">
-              📅 Adicionar ao Google Agenda
-            </a>
-          </div>
-        `;
-      }).join("");
-    }
-
-    fetch(`${BASE_CSV_URL}&t=${Date.now()}`)
-      .then(res => res.text())
-      .then(csv => {
-        const parsed = parseCSV(csv);
-        allRows = parsed.filter(r => r["DATA"]);
-        populateFilter(allRows);
-        render(document.getElementById("memberFilter").value);
-      })
-      .catch(() => {
-        document.getElementById("scheduleList").innerHTML =
-          `<div class="empty">Erro ao carregar planilha. Verifique o link CSV.</div>`;
-      });
-  </script>
-</body>
-</html>
+    .cal-grid {
+      display: grid;
+      grid-template-columns:
