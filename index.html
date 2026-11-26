@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#121212">
   <title>Escala Equipe Técnica</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #121212;
@@ -14,6 +14,7 @@
       --text: #f1f3f5;
       --muted: #9aa0a6;
       --accent: #00d084;
+      --next-gold: #fbbf24;
       --pill-bg: #2a2d35;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
@@ -25,17 +26,90 @@
     .filter-box label { display: block; font-size: 0.75rem; color: var(--muted); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; }
     select { width: 100%; padding: 10px 12px; border-radius: 8px; background: var(--bg); color: var(--text); border: 1px solid var(--border); font-size: 0.95rem; outline: none; }
     select:focus { border-color: var(--accent); }
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; margin-bottom: 12px; }
+
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; margin-bottom: 14px; position: relative; }
     .card.highlight { border-left: 4px solid var(--accent); }
-    .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .date { font-size: 1.05rem; font-weight: 700; color: #fff; }
+    
+    /* Destaque da Próxima Escala */
+    .card.next-up {
+      border: 1.5px solid var(--next-gold);
+      background: linear-gradient(145deg, #25231b 0%, #1e2024 100%);
+      box-shadow: 0 0 18px rgba(251, 191, 36, 0.18);
+    }
+    .next-badge {
+      display: inline-block;
+      background: var(--next-gold);
+      color: #121212;
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 6px;
+    }
+
+    .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; gap: 8px; }
+    .date { font-size: 1.08rem; font-weight: 700; color: #fff; }
     .time { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
-    .event-tag { font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 99px; background: rgba(255,255,255,0.08); color: #e9ecef; }
-    .roles-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
-    .role-item { background: var(--pill-bg); padding: 6px 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; }
-    .role-name { color: var(--muted); font-size: 0.72rem; font-weight: 600; text-transform: uppercase; }
+    .event-tag { font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 99px; background: rgba(255,255,255,0.08); color: #e9ecef; white-space: nowrap; }
+
+    /* Bloco de Informações Centralizado */
+    .info-banner {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin-bottom: 10px;
+      text-align: center;
+      font-size: 0.82rem;
+      color: #e2e8f0;
+      line-height: 1.4;
+    }
+
+    .roles-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--border); }
+    
+    /* Coordenador ocupando 2 colunas e centralizado */
+    .coord-box {
+      grid-column: span 2;
+      background: rgba(0, 208, 132, 0.1);
+      border: 1px solid rgba(0, 208, 132, 0.25);
+      padding: 8px 12px;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .coord-box .role-name { color: var(--accent); font-size: 0.68rem; margin-bottom: 2px; }
+    .coord-box .person-name { font-size: 0.95rem; font-weight: 700; letter-spacing: 0.02em; }
+
+    .role-item { background: var(--pill-bg); padding: 7px 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; }
+    .role-name { color: var(--muted); font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
     .person-name { font-weight: 600; color: #fff; }
-    .person-me { color: var(--accent); font-weight: 700; }
+    .person-me { color: var(--accent); font-weight: 800; }
+
+    /* Botão Adicionar à Agenda */
+    .cal-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      margin-top: 12px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    .cal-btn:hover, .cal-btn:active { background: rgba(255, 255, 255, 0.12); }
+
     .loading, .empty { text-align: center; color: var(--muted); padding: 40px 20px; font-size: 0.9rem; line-height: 1.5; }
   </style>
 </head>
@@ -59,7 +133,11 @@
 
   <script>
     const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSXiQUm_GcKyup0R2ksKynxi-j7H9MHTCRqodZnsG8ImN0pdZva9c0VWvUHgUKRF1YWN3tswiZW_bmX/pub?gid=0&single=true&output=csv";
-    const IGNORED_COLS = ["ID", "DATA", "HORA_INICIO", "HORA_FIM", "EVENTO", "NOTIFICAR", "NOTIFICAÇÃO", "NOTIFICACAO"];
+    const NON_ROLE_COLS = [
+      "ID", "DATA", "HORA_INICIO", "HORA INICIO", "HORA_FIM", "HORA FIM",
+      "EVENTO", "NOTIFICAR", "NOTIFICAÇÃO", "NOTIFICACAO",
+      "INFORMACOES", "INFORMAÇÕES", "INFORMACAO", "INFORMAÇÃO", "OBS", "OBSERVACOES", "OBSERVAÇÕES"
+    ];
     let allRows = [];
     let roleColumns = [];
 
@@ -88,7 +166,7 @@
       const rawHeaders = parseCSVLine(lines[0]);
       const upperHeaders = rawHeaders.map(h => h.toUpperCase());
 
-      roleColumns = rawHeaders.filter((h, idx) => h && !IGNORED_COLS.includes(upperHeaders[idx]));
+      roleColumns = rawHeaders.filter((h, idx) => h && !NON_ROLE_COLS.includes(upperHeaders[idx]));
 
       return lines.slice(1).map(line => {
         const values = parseCSVLine(line);
@@ -102,11 +180,46 @@
       });
     }
 
+    function parseBRDate(dateStr) {
+      if (!dateStr) return null;
+      const parts = dateStr.split("/");
+      if (parts.length !== 3) return null;
+      return new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]), 23, 59, 59);
+    }
+
+    function buildGoogleCalendarLink(row, activeRoles) {
+      const title = encodeURIComponent(`${row["EVENTO"] || "Escala Técnica"} - Equipe Técnica`);
+      const parts = (row["DATA"] || "").split("/");
+      let datesParam = "";
+
+      if (parts.length === 3) {
+        const yyyy = parts[2];
+        const mm = parts[1].padStart(2, "0");
+        const dd = parts[0].padStart(2, "0");
+
+        const iniStr = (row["HORA_INICIO"] || row["HORA INICIO"] || "19:00").replace(":", "").padEnd(6, "0").slice(0, 6);
+        const fimStr = (row["HORA_FIM"] || row["HORA FIM"] || "21:00").replace(":", "").padEnd(6, "0").slice(0, 6);
+
+        datesParam = `&dates=${yyyy}${mm}${dd}T${iniStr}/${yyyy}${mm}${dd}T${fimStr}`;
+      }
+
+      const info = row["INFORMAÇÕES"] || row["INFORMACOES"] || row["INFORMAÇÃO"] || row["INFORMACAO"] || row["OBS"] || "";
+      const teamText = activeRoles.map(r => `${r}: ${row._raw[r]}`).join("\n");
+      const detailsText = (info ? `Observações: ${info}\n\n` : "") + `Escalação:\n${teamText}`;
+      const details = encodeURIComponent(detailsText);
+
+      return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}${datesParam}&details=${details}`;
+    }
+
     function populateFilter(rows) {
       const names = new Set();
       rows.forEach(r => roleColumns.forEach(role => { if (r._raw[role]) names.add(r._raw[role]); }));
       const select = document.getElementById("memberFilter");
-      Array.from(names).sort().forEach(name => {
+
+      // Ordenação alfabética respeitando acentos do português (ex: ÁRTUR no início)
+      const sortedNames = Array.from(names).sort((a, b) => a.localeCompare(b, 'pt-BR', { sensitivity: 'base' }));
+
+      sortedNames.forEach(name => {
         const opt = document.createElement("option");
         opt.value = name;
         opt.textContent = name;
@@ -114,7 +227,7 @@
       });
 
       const saved = localStorage.getItem("selectedMember");
-      if (saved && Array.from(names).includes(saved)) {
+      if (saved && sortedNames.includes(saved)) {
         select.value = saved;
       }
 
@@ -131,15 +244,48 @@
         : allRows.filter(r => roleColumns.some(role => r._raw[role] === filterName));
 
       if (!filtered.length) {
-        container.innerHTML = `<div class="empty">Nenhuma escala encontrada.<br><small>Verifique se a aba publicada no Google Planilhas foi a aba <b>Escalas</b>.</small></div>`;
+        container.innerHTML = `<div class="empty">Nenhuma escala encontrada.</div>`;
         return;
       }
 
+      // Identifica a escala mais próxima a partir de hoje
+      const now = new Date();
+      let nextIndex = -1;
+      let minDiff = Infinity;
+      filtered.forEach((row, idx) => {
+        const d = parseBRDate(row["DATA"]);
+        if (d && d >= now) {
+          const diff = d - now;
+          if (diff < minDiff) {
+            minDiff = diff;
+            nextIndex = idx;
+          }
+        }
+      });
+
       container.className = "";
-      container.innerHTML = filtered.map(row => {
+      container.innerHTML = filtered.map((row, idx) => {
+        const isNext = idx === nextIndex;
         const activeRoles = roleColumns.filter(role => row._raw[role]);
         const isUserScheduled = filterName !== "TODOS" && activeRoles.some(r => row._raw[r] === filterName);
-        const rolesHTML = activeRoles.map(role => {
+
+        // Separa Coordenador das demais funções
+        const coordCol = activeRoles.find(r => r.toUpperCase() === "COORDENADOR");
+        const otherRoles = activeRoles.filter(r => r.toUpperCase() !== "COORDENADOR");
+
+        let rolesHTML = "";
+        if (coordCol) {
+          const coordPerson = row._raw[coordCol];
+          const isMe = coordPerson === filterName;
+          rolesHTML += `
+            <div class="coord-box">
+              <span class="role-name">${coordCol}</span>
+              <span class="${isMe ? 'person-me' : 'person-name'}">${coordPerson}</span>
+            </div>
+          `;
+        }
+
+        rolesHTML += otherRoles.map(role => {
           const person = row._raw[role];
           const isMe = person === filterName;
           return `<div class="role-item">
@@ -150,9 +296,12 @@
 
         const horaIni = row["HORA_INICIO"] || row["HORA INICIO"] || "";
         const horaFim = row["HORA_FIM"] || row["HORA FIM"] || "";
+        const infoText = row["INFORMAÇÕES"] || row["INFORMACOES"] || row["INFORMAÇÃO"] || row["INFORMACAO"] || row["OBS"] || "";
+        const calLink = buildGoogleCalendarLink(row, activeRoles);
 
         return `
-          <div class="card ${isUserScheduled ? 'highlight' : ''}">
+          <div class="card ${isNext ? 'next-up' : (isUserScheduled ? 'highlight' : '')}">
+            ${isNext ? '<div class="next-badge">★ Próxima Escala</div>' : ''}
             <div class="card-top">
               <div>
                 <div class="date">${row["DATA"] || ""}</div>
@@ -160,7 +309,11 @@
               </div>
               <span class="event-tag">${row["EVENTO"] || "Culto"}</span>
             </div>
+            ${infoText ? `<div class="info-banner">${infoText}</div>` : ''}
             <div class="roles-grid">${rolesHTML}</div>
+            <a href="${calLink}" target="_blank" rel="noopener" class="cal-btn">
+              📅 Adicionar ao Google Agenda
+            </a>
           </div>
         `;
       }).join("");
