@@ -132,14 +132,10 @@
   <div id="scheduleList" class="loading">Carregando escalas...</div>
 
   <script>
-    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSXiQUm_GcKyup0R2ksKynxi-j7H9MHTCRqodZnsG8ImN0pdZva9c0VWvUHgUKRF1YWN3tswiZW_bmX/pub?gid=0&single=true&output=csv";
-    const NON_ROLE_COLS = [
-      "ID", "DATA", "HORA_INICIO", "HORA INICIO", "HORA_FIM", "HORA FIM",
-      "EVENTO", "NOTIFICAR", "NOTIFICAÇÃO", "NOTIFICACAO",
-      "INFORMACOES", "INFORMAÇÕES", "INFORMACAO", "INFORMAÇÃO", "OBS", "OBSERVACOES", "OBSERVAÇÕES"
-    ];
+    const BASE_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSXiQUm_GcKyup0R2ksKynxi-j7H9MHTCRqodZnsG8ImN0pdZva9c0VWvUHgUKRF1YWN3tswiZW_bmX/pub?gid=0&single=true&output=csv";
+    const TARGET_ROLES = ["COORDENADOR", "PC", "YAMAHA", "CORTEX", "BERINGHER"];
     let allRows = [];
-    let roleColumns = [];
+    let activeRoleHeaders = [];
 
     function parseCSVLine(line) {
       const result = [];
@@ -161,12 +157,17 @@
     }
 
     function parseCSV(text) {
-      const lines = text.trim().split(/\r?\n/);
+      const cleanText = text.replace(/^\uFEFF/, "").trim();
+      const lines = cleanText.split(/\r?\n/);
       if (lines.length < 2) return [];
-      const rawHeaders = parseCSVLine(lines[0]);
-      const upperHeaders = rawHeaders.map(h => h.toUpperCase());
+      const rawHeaders = parseCSVLine(lines[0]).map(h => h.trim());
 
-      roleColumns = rawHeaders.filter((h, idx) => h && !NON_ROLE_COLS.includes(upperHeaders[idx]));
+      // Identifica exatamente as colunas das 5 funções mantendo a ordem definida
+      activeRoleHeaders = [];
+      TARGET_ROLES.forEach(target => {
+        const found = rawHeaders.find(h => h.toUpperCase() === target);
+        if (found) activeRoleHeaders.push(found);
+      });
 
       return lines.slice(1).map(line => {
         const values = parseCSVLine(line);
@@ -194,7 +195,7 @@
       return `${yyyy}${mm}${dd}`;
     }
 
-    function buildGoogleCalendarLink(row, activeRoles) {
+    function buildGoogleCalendarLink(row, rowRoles) {
       const title = encodeURIComponent("Escala DESIL");
       const parts = (row["DATA"] || "").split("/");
       let datesParam = "";
@@ -202,14 +203,13 @@
       if (parts.length === 3) {
         const startDate = new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
         const endDate = new Date(startDate);
-        endDate.setDate(endDate.getDate() + 1); // Padrão do Google Agenda para Dia Inteiro (data início / dia seguinte)
-
+        endDate.setDate(endDate.getDate() + 1);
         datesParam = `&dates=${formatYYYYMMDD(startDate)}/${formatYYYYMMDD(endDate)}`;
       }
 
       const eventoNome = row["EVENTO"] || "";
       const info = row["INFORMAÇÕES"] || row["INFORMACOES"] || row["INFORMAÇÃO"] || row["INFORMACAO"] || row["OBS"] || "";
-      const teamText = activeRoles.map(r => `${r}: ${row._raw[r]}`).join("\n");
+      const teamText = rowRoles.map(r => `${r}: ${row._raw[r]}`).join("\n");
 
       let detailsParts = [];
       if (eventoNome) detailsParts.push(`Evento: ${eventoNome}`);
@@ -223,9 +223,13 @@
 
     function populateFilter(rows) {
       const names = new Set();
-      rows.forEach(r => roleColumns.forEach(role => { if (r._raw[role]) names.add(r._raw[role]); }));
-      const select = document.getElementById("memberFilter");
+      rows.forEach(r => {
+        activeRoleHeaders.forEach(role => {
+          if (r._raw[role]) names.add(r._raw[role]);
+        });
+      });
 
+      const select = document.getElementById("memberFilter");
       const sortedNames = Array.from(names).sort((a, b) => a.localeCompare(b, 'pt-BR', { sensitivity: 'base' }));
 
       sortedNames.forEach(name => {
@@ -250,10 +254,10 @@
       const container = document.getElementById("scheduleList");
       const filtered = filterName === "TODOS"
         ? allRows
-        : allRows.filter(r => roleColumns.some(role => r._raw[role] === filterName));
+        : allRows.filter(r => activeRoleHeaders.some(role => r._raw[role] === filterName));
 
       if (!filtered.length) {
-        container.innerHTML = `<div class="empty">Nenhuma escala encontrada.</div>`;
+        container.innerHTML = `<div class="empty">Nenhuma escala encontrada.<br><small>Verifique se o link publicado aponta para a aba <b>Escalas</b>.</small></div>`;
         return;
       }
 
@@ -263,4 +267,81 @@
       filtered.forEach((row, idx) => {
         const d = parseBRDate(row["DATA"]);
         if (d && d >= now) {
-          const diff = d - now
+          const diff = d - now;
+          if (diff < minDiff) {
+            minDiff = diff;
+            nextIndex = idx;
+          }
+        }
+      });
+
+      container.className = "";
+      container.innerHTML = filtered.map((row, idx) => {
+        const isNext = idx === nextIndex;
+        const rowRoles = activeRoleHeaders.filter(role => row._raw[role]);
+        const isUserScheduled = filterName !== "TODOS" && rowRoles.some(r => row._raw[r] === filterName);
+
+        const coordCol = rowRoles.find(r => r.toUpperCase() === "COORDENADOR");
+        const otherRoles = rowRoles.filter(r => r.toUpperCase() !== "COORDENADOR");
+
+        let rolesHTML = "";
+        if (coordCol) {
+          const coordPerson = row._raw[coordCol];
+          const isMe = coordPerson === filterName;
+          rolesHTML += `
+            <div class="coord-box">
+              <span class="role-name">${coordCol}</span>
+              <span class="${isMe ? 'person-me' : 'person-name'}">${coordPerson}</span>
+            </div>
+          `;
+        }
+
+        rolesHTML += otherRoles.map(role => {
+          const person = row._raw[role];
+          const isMe = person === filterName;
+          return `<div class="role-item">
+            <span class="role-name">${role}</span>
+            <span class="${isMe ? 'person-me' : 'person-name'}">${person}</span>
+          </div>`;
+        }).join("");
+
+        const horaIni = row["HORA_INICIO"] || row["HORA INICIO"] || "";
+        const horaFim = row["HORA_FIM"] || row["HORA FIM"] || "";
+        const infoText = row["INFORMAÇÕES"] || row["INFORMACOES"] || row["INFORMAÇÃO"] || row["INFORMACAO"] || row["OBS"] || "";
+        const calLink = buildGoogleCalendarLink(row, rowRoles);
+
+        return `
+          <div class="card ${isNext ? 'next-up' : (isUserScheduled ? 'highlight' : '')}">
+            ${isNext ? '<div class="next-badge">★ Próxima Escala</div>' : ''}
+            <div class="card-top">
+              <div>
+                <div class="date">${row["DATA"] || ""}</div>
+                <div class="time">${horaIni} ${horaFim ? 'às ' + horaFim : ''}</div>
+              </div>
+              <span class="event-tag">${row["EVENTO"] || "Culto"}</span>
+            </div>
+            ${infoText ? `<div class="info-banner">${infoText}</div>` : ''}
+            <div class="roles-grid">${rolesHTML}</div>
+            <a href="${calLink}" target="_blank" rel="noopener" class="cal-btn">
+              📅 Adicionar ao Google Agenda
+            </a>
+          </div>
+        `;
+      }).join("");
+    }
+
+    fetch(`${BASE_CSV_URL}&t=${Date.now()}`)
+      .then(res => res.text())
+      .then(csv => {
+        const parsed = parseCSV(csv);
+        allRows = parsed.filter(r => r["DATA"]);
+        populateFilter(allRows);
+        render(document.getElementById("memberFilter").value);
+      })
+      .catch(() => {
+        document.getElementById("scheduleList").innerHTML =
+          `<div class="empty">Erro ao carregar planilha. Verifique o link CSV.</div>`;
+      });
+  </script>
+</body>
+</html>
